@@ -1,0 +1,42 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="derp.portfoliomanager.ClientPickerFragment">
+
+    <android.support.v7.widget.SearchView
+        android:id="@+id/searchBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="8dp"
+        android:layout_toStartOf="@+id/addClientButton"
+        android:ems="10"
+        android:hint="Search..."
+        android:imeOptions="actionSearch"
+        android:inputType="textPersonName"
+        android:text=""
+        app:iconifiedByDefault="true" />
+
+    <Button
+        android:id="@+id/addClientButton"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_alignBaseline="@+id/searchBox"
+        android:layout_alignBottom="@+id/searchBox"
+        android:layout_alignParentEnd="true"
+        android:background="@color/colorPrimaryDark"
+        android:drawableLeft="@drawable/ic_action_add"
+        android:paddingLeft="8dp" />
+
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/clientsView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/searchBox"
+        android:layout_marginTop="8dp"
+        android:layout_centerHorizontal="true" />
+
+</RelativeLayout>
