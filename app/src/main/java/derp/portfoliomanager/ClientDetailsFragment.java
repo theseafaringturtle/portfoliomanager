@@ -111,6 +111,7 @@ public class ClientDetailsFragment extends Fragment {
                     fetchedSurname = details.getString(2);
                     fetchedPhone = details.getString(3);
                     fetchedEmail = details.getString(4);
+                    //herp derp
                     //set form input text
                     ((EditText) activity.findViewById(R.id.detailsFName)).setText(fetchedName);
                     ((EditText) activity.findViewById(R.id.detailsLName)).setText(fetchedSurname);
