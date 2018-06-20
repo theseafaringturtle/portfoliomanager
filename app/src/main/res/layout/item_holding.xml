@@ -18,13 +18,27 @@
         android:textStyle="bold"
         android:textSize="18dp" />
 
-    <TextView
-        android:id="@+id/holdingValue"
+    <RelativeLayout
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:paddingLeft="8dp"
-        android:text="$34,566,66"
-        android:textSize="20sp" />
+        android:layout_weight="1">
+        <TextView
+            android:id="@+id/holdingValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="8dp"
+            android:text="$34,566,66"
+            android:textSize="20sp" />
+        <TextView
+            android:id="@+id/holdingPerf"
+            android:layout_below="@id/holdingValue"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="8dp"
+            android:text="+1.8"
+            android:textColor="#09DE09"
+            android:textSize="20sp" />
+    </RelativeLayout>
+
 
 </LinearLayout>

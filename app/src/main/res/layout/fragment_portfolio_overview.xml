@@ -5,6 +5,14 @@
     tools:context="derp.portfoliomanager.PortfolioOverview">
 
 
+    <TextView
+        android:id="@+id/noHoldingsText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:textSize="25sp"
+        android:text="No holdings found"
+        android:visibility="gone" />
     <ListView
         android:id="@+id/holdingsList"
         android:layout_width="match_parent"

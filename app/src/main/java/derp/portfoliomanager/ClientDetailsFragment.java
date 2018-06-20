@@ -47,9 +47,6 @@ public class ClientDetailsFragment extends Fragment {
     String fetchedPhone= "";
     String fetchedEmail= "";
 
-    ArrayList<PortfolioDescHolder> portfolios = new ArrayList<>();
-    ArrayAdapter<PortfolioDescHolder> portfoliosAdapter;
-
     public ClientDetailsFragment() {
         // Required empty public constructor
     }
@@ -82,13 +79,12 @@ public class ClientDetailsFragment extends Fragment {
                 submitClientDetails((MainActivity)getActivity());
             }
         });
-        setupPortfolioListView();
-        getActivity().findViewById(R.id.addNewPortfolio).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pickExcelFile();
-            }
-        });
+
+        //add portfolio list to this screen
+        PortfolioList portfolioList = PortfolioList.newInstance(currentClientId);
+        FragmentTransaction transaction = getChildFragmentManager().beginTransaction();
+        transaction.replace(R.id.portListContainer, portfolioList);
+        transaction.commit();
     }
 
     void fetchClientDetails(final MainActivity activity) {
@@ -97,44 +93,34 @@ public class ClientDetailsFragment extends Fragment {
         String url = "http://54.36.182.56:5000/client/view?id="+currentClientId;
         //onresponse callback: parse json response, insert downloaded client details into form
         //onerror callback: display error response
-        JsonObjectRequest jsonArrayRequest = new JsonObjectRequest(Request.Method.GET, url, null, new Response.Listener<JSONObject>() {
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.GET, url, null, new Response.Listener<JSONArray>() {
             @Override
-            public void onResponse(JSONObject response) {
+            public void onResponse(JSONArray response) {
                 //check if response came too late and we've already left this screen
                 if (!activity.checkFragmentVisible(ClientDetailsFragment.class))
                     return;
                 //parse response
                 try {
-                    JSONArray details = response.getJSONArray("contactDetails");
                     //store downloaded details to later compare them to check for any changes
-                    fetchedName = details.getString(1);
-                    fetchedSurname = details.getString(2);
-                    fetchedPhone = details.getString(3);
-                    fetchedEmail = details.getString(4);
-                    //herp derp
+                    fetchedName = response.getString(1);
+                    fetchedSurname = response.getString(2);
+                    fetchedPhone = response.getString(3);
+                    fetchedEmail = response.getString(4);
                     //set form input text
                     ((EditText) activity.findViewById(R.id.detailsFName)).setText(fetchedName);
                     ((EditText) activity.findViewById(R.id.detailsLName)).setText(fetchedSurname);
                     ((EditText) activity.findViewById(R.id.detailsPhone)).setText(fetchedPhone);
                     ((EditText) activity.findViewById(R.id.detailsEmail)).setText(fetchedEmail);
-                    JSONArray ports = response.getJSONArray("portfolios");
-                    portfolios.clear();
-                    for(int i = 0;i<ports.length();i++){//initialise data container with database id and description
-                        portfolios.add(new PortfolioDescHolder(ports.getJSONArray(i).getInt(0),ports.getJSONArray(i).getString(1)));
-                    }
-                    if(ports.length() == 0)
-                        portfolios.add(new PortfolioDescHolder(-1,"No portfolios found"));
-                    portfoliosAdapter.notifyDataSetChanged();
 
                 } catch (JSONException ex) {
-                    activity.showError("Failed to fetch client details",ex.toString(),false);
+                    Utils.showError(activity,"Failed to fetch client details",ex.toString(),false);
                 }
 
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                activity.showError("Failed to fetch client details",error.toString(),false);
+                Utils.showError(activity,"Failed to fetch client details",error.toString(),false);
             }
         });
         //attempt request again after 4 seconds
@@ -144,9 +130,8 @@ public class ClientDetailsFragment extends Fragment {
             queue.add(jsonArrayRequest);
     }
 
-
+    //performs HYTP POST request to add or update details of a client
     public void submitClientDetails(final MainActivity activity){
-        //perform HYTP POST request to add or update details of a client
         //get text values from form
         String firstName = ((EditText) activity.findViewById(R.id.detailsFName)).getText().toString();
         String lastName = ((EditText) activity.findViewById(R.id.detailsLName)).getText().toString();
@@ -195,33 +180,11 @@ public class ClientDetailsFragment extends Fragment {
                     Toast.makeText(activity,message,Toast.LENGTH_LONG).show();// display error message
                 }else
                     //unexpected serverside error - display error message
-                    activity.showError("Failed to submit client details",error.toString(),false);
+                    Utils.showError(activity,"Failed to submit client details",error.toString(),false);
             }
         });
         queue.add(stringRequest);
         returnToClientPicker();
-    }
-    void setupPortfolioListView(){
-        portfoliosAdapter = new PortfoliosAdapter<>(getActivity(),R.layout.item_portfolio,portfolios);
-        ListView listView = (ListView) getActivity().findViewById(R.id.portList);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if(portfoliosAdapter.getItem(position).DBid == -1)// no portfolios
-                    return;
-                final AppCompatActivity act = (AppCompatActivity) getActivity();
-                act.getSupportActionBar().setTitle(portfoliosAdapter.getItem(position).desc);
-                PortfolioOverview newFragment = PortfolioOverview.newInstance(portfoliosAdapter.getItem(position).DBid);
-                //switch screen
-                FragmentTransaction transaction = act.getSupportFragmentManager().beginTransaction();
-                transaction.replace(R.id.fragmentContainer, newFragment);
-                //add the transaction to the back stack so the user can navigate back
-                transaction.addToBackStack(null);
-                // Commit the transaction
-                transaction.commit();
-            }
-        });
-        listView.setAdapter(portfoliosAdapter);
     }
 
     void returnToClientPicker(){//navigate back to client picker screen
@@ -229,22 +192,9 @@ public class ClientDetailsFragment extends Fragment {
         fragmentManager.popBackStack();
     }
 
-    void pickExcelFile(){
-        //display instructions message
-        Toast.makeText(getContext(),"Pick an excel file",Toast.LENGTH_LONG).show();
-        //launch secondary activity to select an excel file using android's default content picker
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        String [] mimeTypes = {"text/csv", "text/comma-separated-values",
-                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",// .xlsx
-                "application/vnd.ms-excel"};// .xls
-        intent.setType("*/*");
-        intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes);
-        //the result will be handled in our activity's onActivityResult callback
-        getActivity().startActivityForResult(intent, 1337);
-    }
-
     @Override
     public void onResume(){
+		//called when switching back to this screen
         super.onResume();
         ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("Client details");
     }
@@ -265,36 +215,4 @@ public class ClientDetailsFragment extends Fragment {
         super.onDetach();
     }
     //end of boilerplate
-}
-
-class PortfolioDescHolder
-{
-    TextView tv;
-    String desc;
-    int DBid;
-    PortfolioDescHolder(int id,String desc){
-        this.DBid = id;
-        this.desc = desc;
-    }
-
-}
-class PortfoliosAdapter<Object> extends ArrayAdapter<Object> {
-    FragmentActivity activity;
-    private static LayoutInflater inflater=null;
-    public PortfoliosAdapter(FragmentActivity act, int layoutResourceId, ArrayList<Object> ports) {
-        super(act,layoutResourceId,ports);
-        activity = act;
-        //boilerplate
-        inflater = ( LayoutInflater ) activity.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-    }
-    @Override
-    public View getView(final int position, View convertView, ViewGroup parent) {
-        //initialise list item and set text description
-        PortfolioDescHolder holder = (PortfolioDescHolder)getItem(position);
-        View rowView;
-        rowView = inflater.inflate(R.layout.item_portfolio, null);
-        holder.tv = (TextView) rowView.findViewById(R.id.portfolioDescription);
-        holder.tv.setText(holder.desc);
-        return rowView;
-    }
 }

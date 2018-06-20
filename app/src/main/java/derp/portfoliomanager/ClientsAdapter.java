@@ -28,7 +28,7 @@ public class ClientsAdapter extends RecyclerView.Adapter<ClientsAdapter.ViewHold
     public class ViewHolder extends RecyclerView.ViewHolder {
         // Your holder should contain a member variable
         // for any view that will be set as you render a row
-        public TextView nameTextView;
+        public Button nameTextView;
         public Button editButton;
 
         // We also create a constructor that accepts the entire item row
@@ -38,7 +38,7 @@ public class ClientsAdapter extends RecyclerView.Adapter<ClientsAdapter.ViewHold
             // to access the context from any ViewHolder instance.
             super(itemView);
 
-            nameTextView = (TextView) itemView.findViewById(R.id.clientName);
+            nameTextView = (Button) itemView.findViewById(R.id.clientName);
             editButton = (Button) itemView.findViewById(R.id.editClientButton);
         }
     }
@@ -46,8 +46,6 @@ public class ClientsAdapter extends RecyclerView.Adapter<ClientsAdapter.ViewHold
     private List<ShortClient> mFilteredClients;
     // Store the context for easy access
     private Context mContext;
-
-    int currentClientId = -1;
 
     // Pass in the contact array into the constructor
     public ClientsAdapter(Context context, List<ShortClient> contacts) {
@@ -78,8 +76,15 @@ public class ClientsAdapter extends RecyclerView.Adapter<ClientsAdapter.ViewHold
         // Get the data model based on position
         final ShortClient client = mFilteredClients.get(position);
         // Set item text
-        TextView textView = viewHolder.nameTextView;
-        textView.setText(client.getName());
+        Button nameButton = viewHolder.nameTextView;
+        nameButton.setText(client.getName());
+        nameButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                PortfolioList pList = PortfolioList.newInstance(client.getId());
+                pList.show(((FragmentActivity)getContext()).getSupportFragmentManager().beginTransaction(), "PortfolioList");
+            }
+        });
         //add handler for edit button
         Button button = viewHolder.editButton;
         button.setOnClickListener(new View.OnClickListener() {
@@ -93,6 +98,7 @@ public class ClientsAdapter extends RecyclerView.Adapter<ClientsAdapter.ViewHold
         // -1 = new client
         final AppCompatActivity act = (AppCompatActivity) mContext;
         ClientDetailsFragment newFragment = ClientDetailsFragment.newInstance();
+        // no arguments if the client is new
         if(id != -1) {
             Bundle args = new Bundle();
             args.putInt("id", id);
@@ -107,6 +113,7 @@ public class ClientsAdapter extends RecyclerView.Adapter<ClientsAdapter.ViewHold
         transaction.commit();
     }
 
+    //filter function for the search box
     @Override
     public Filter getFilter() {
 
@@ -115,11 +122,14 @@ public class ClientsAdapter extends RecyclerView.Adapter<ClientsAdapter.ViewHold
             protected FilterResults performFiltering(CharSequence charSequence) {
                 String charString = charSequence.toString();
                 if (charString.isEmpty()) {
+                    //no search - show all clients
                     mFilteredClients = mClients;
                 } else {
+                    //check if every client contains the text in the search box
                     ArrayList<ShortClient> filteredList = new ArrayList<>();
                     for (ShortClient client : mClients) {
                         if (client.getName().toLowerCase().contains(charString.toLowerCase())) {
+                            //append it to filtered list
                             filteredList.add(client);
                         }
                     }

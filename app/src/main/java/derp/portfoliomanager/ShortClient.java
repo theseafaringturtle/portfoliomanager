@@ -18,6 +18,9 @@ import java.util.ArrayList;
  * Created by User on 03/12/2017.
  */
 class ShortClient {
+    //this class holds the preview for each client inside the client picker screen
+    //instead of containing all the details, it holds a name+lastname string and corresponding
+    //database id to be used in case we want to fetch all the details
     private String name;
     private int id;
 
@@ -31,5 +34,6 @@ class ShortClient {
     public int getId() {
         return id;
     }
+
 
 }

@@ -36,21 +36,12 @@ import java.util.List;
 import derp.portfoliomanager.ShortClient;
 
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link ClientPickerFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link ClientPickerFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
 public class ClientPickerFragment extends Fragment {
 
     RecyclerView recyclerView;
     ClientsAdapter adapter = null;
     ArrayList<ShortClient> clients = new ArrayList<>();
 
-    private OnFragmentInteractionListener mListener;
 
     public ClientPickerFragment() {
         // Required empty public constructor
@@ -83,12 +74,6 @@ public class ClientPickerFragment extends Fragment {
             }
         });
         addSearchFunction();
-        recyclerView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
-            }
-        });
     }
 
     public void fetchClientsList(final Context context) {
@@ -119,6 +104,7 @@ public class ClientPickerFragment extends Fragment {
                 Toast.makeText(context,error.toString(),Toast.LENGTH_LONG).show();
             }
         });
+        //todo put random token in next request params
         //attempt request again after 5 seconds
         jsonArrayRequest.setRetryPolicy(new DefaultRetryPolicy(5000,
                 DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
@@ -127,6 +113,7 @@ public class ClientPickerFragment extends Fragment {
     }
 
     void addSearchFunction(){
+        //set event handler for search box
         ((SearchView)getActivity().findViewById(R.id.searchBox)).setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -134,6 +121,7 @@ public class ClientPickerFragment extends Fragment {
             }
             @Override
             public boolean onQueryTextChange(String newText) {
+                //filtering function in ClientsAdapter.java
                 adapter.getFilter().filter(newText);
                 return true;
             }
@@ -141,6 +129,7 @@ public class ClientPickerFragment extends Fragment {
     }
     @Override
     public void onResume() {
+		//called when switching back to this screen
         super.onResume();
         ((AppCompatActivity)getActivity()).getSupportActionBar().setTitle("Select a client");
     }
@@ -154,38 +143,16 @@ public class ClientPickerFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_client_picker, container, false);
     }
 
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        void onFragmentInteraction(Uri uri);
     }
 }
