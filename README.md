@@ -20,6 +20,6 @@ Libraries :
 
 
 <img src="https://i.imgur.com/2lCwjwD.jpg" width="240" height="400">
-<img src="http://imgur.com/2lCwjwD.jpg" width="240" height="400">
+<img src="http://imgur.com/3SVAdJg.jpg" width="240" height="400">
 <img src="http://imgur.com/7vyNeTo.jpg" width="240" height="400">
 <img src="http://imgur.com/nQ4i0oe.jpg" width="240" height="400">
